@@ -5,8 +5,14 @@
 package it.polito.tdp.itunes;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
+
+
+import it.polito.tdp.itunes.model.Album;
 import it.polito.tdp.itunes.model.Model;
+import it.polito.tdp.itunes.model.Track;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -34,7 +40,7 @@ public class FXMLController {
     private Button btnSet; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbA1"
-    private ComboBox<?> cmbA1; // Value injected by FXMLLoader
+    private ComboBox<Album> cmbA1; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtDurata"
     private TextField txtDurata; // Value injected by FXMLLoader
@@ -48,15 +54,73 @@ public class FXMLController {
     @FXML
     void doComponente(ActionEvent event) {
     	
+     	Album a = this.cmbA1.getValue();
+    
+    	
+    	if (a==null) {
+    		this.txtResult.setText("Please select an album");
+    		return;
+    	}
+    	
+    	txtResult.appendText("La componente connessa di: " + a + " è: " + this.model.componentiConnesse(a));
+    	txtResult.appendText("\n" + "Durata componente: " + this.model.durataConnesse(a));
+    
+    	
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	
+    	int durata;
+    	try {
+    		durata = Integer.parseInt(txtDurata.getText());
+    		
+    	} catch (NumberFormatException e) {
+    		txtResult.setText("Inserisci una durata");
+     
+    		return;
+    	}
+    	
+    	if(durata<0) {
+   		 this.txtResult.setText("Durata must be a nonnegative integer.");
+   		 return;
+   	 }
+    	
+    	this.model.creaGrafo(durata);
+    	List<Album> vertici = this.model.getVertici();
+    	
+    	this.txtResult.setText("Grafo creato, con " + vertici.size() + " vertici e " + this.model.getNArchi()+ " archi\n");
+    	this.cmbA1.getItems().clear();
+    	this.cmbA1.getItems().addAll(vertici);
+    	
     }
 
     @FXML
     void doEstraiSet(ActionEvent event) {
+    	
+    	
+    	Album a = this.cmbA1.getValue();
+    	if(a == null) {
+    		txtResult.appendText("Seleziona un album!");
+    		return ;
+    	}
+    	int dTot;
+    	try {
+    		dTot = Integer.parseInt(txtX.getText());
+    	}catch (NumberFormatException e) {
+    		txtResult.appendText("Inseririci un valore numerico per la soglia");
+    		return ;
+    	}
+    	
+    	if(!this.model.grafoCreato()) {
+    		txtResult.appendText("Crea prima il grafo!");
+    		return ;
+    	}
+    	
+    	txtResult.appendText("\n  LISTA ALBUM MIGLIORE: \n");
+    	for(Album a2 : this.model.cercaLista(a, dTot)) {
+    		txtResult.appendText(a2 + "\n");
+    	}
 
     }
 
